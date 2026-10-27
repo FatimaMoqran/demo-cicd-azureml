@@ -1,0 +1,23 @@
+yaml
+name: Mon premier workflow       # nom affiché dans l'onglet Actions
+
+on:                              # QUAND le workflow se lance
+  push:                          # à chaque modification poussée…
+    branches: [main]             # …sur la branche main
+  workflow_dispatch:             # + un bouton pour le lancer à la main
+
+jobs:
+  dire-bonjour:                  # nom du job (libre)
+    runs-on: ubuntu-latest       # machine Linux prêtée par GitHub
+    steps:                       # étapes exécutées dans l'ordre
+      - name: Dire bonjour
+        run: echo "Bonjour depuis GitHub Actions !"
+
+      - name: Afficher la version de Python
+        run: python --version
+
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4    # action toute faite : copie le dépôt sur la machine
+
+      - name: Lister les fichiers
+        run: ls -la
