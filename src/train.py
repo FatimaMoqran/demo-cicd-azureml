@@ -1,6 +1,6 @@
 """Entrainement d'un modele de detection de defaut de paiement."""
 import argparse
-import os 
+
 
 import mlflow
 import mlflow.sklearn
