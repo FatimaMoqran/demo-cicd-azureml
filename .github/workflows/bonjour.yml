@@ -1,4 +1,4 @@
-yaml
+
 name: Mon premier workflow       # nom affiché dans l'onglet Actions
 
 on:                              # QUAND le workflow se lance
