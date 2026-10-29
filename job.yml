@@ -1,0 +1,15 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+display_name: train-depuis-github
+experiment_name: cicd-credit
+code: src
+command: >-
+  python train.py
+  --data ${{inputs.data}}
+  --class_weight ${{inputs.class_weight}}
+inputs:
+  data:
+    type: uri_file
+    path: azureml:credit-card-clients:2
+  class_weight: balanced
+environment: azureml:env-credit-sklearn:1
+compute: azureml:ccfatima
