@@ -1,0 +1,50 @@
+name: Entrainement Azure ML
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+env:
+  RG: rg-iwid-fatima
+  WS: mlw-iwid-fatima
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install -r requirements.txt
+      - run: flake8 src tests --max-line-length=100
+      - run: pytest tests -v
+        env:
+          PYTHONPATH: src
+
+  entrainement:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+      - name: Se connecter a Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Installer l'extension Azure ML
+        run: az extension add -n ml
+      - name: Lancer le job et attendre la fin
+        run: |
+          NOM_JOB=$(az ml job create -f job.yml -g $RG -w $WS --query name -o tsv)
+          echo "Job lance : $NOM_JOB"
+          while true; do
+            STATUT=$(az ml job show -n $NOM_JOB -g $RG -w $WS --query status -o tsv)
+            echo "Statut : $STATUT"
+            case $STATUT in
+              Completed) exit 0 ;;
+              Failed|Canceled) exit 1 ;;
+            esac
+            sleep 30
+          done
